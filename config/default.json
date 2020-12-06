@@ -1,0 +1,5 @@
+{
+  "mongoURI": "mongodb+srv://sipizork:wU3uPo8Bzw5MQHiv@coworker.kfzg5.mongodb.net/<dbname>?retryWrites=true&w=majority",
+  "jwtSecret": "xlyvBV4drMlxz5drro0PG5jcKFrsFh",
+  "adminPermission": 2
+}
