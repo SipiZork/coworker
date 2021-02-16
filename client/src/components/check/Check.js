@@ -2,8 +2,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { getCurrentUserChecksByYearAndMonth, checkIn, checkOut } from '../../actions/check';
-import { getYear, getMonth, getDay, getMonthName } from '../../utils/date';
-import auth from '../../reducers/auth';
+import { getYear, getMonth, getDate, getMonthName } from '../../utils/date';
 import CheckTable from './CheckTable';
 
 const Check = ({ check: { checks, checkLoading }, auth: { user, loading, isAuthenticated }, getCurrentUserChecksByYearAndMonth, checkIn, checkOut }) => {
@@ -12,7 +11,7 @@ const Check = ({ check: { checks, checkLoading }, auth: { user, loading, isAuthe
     getCurrentUserChecksByYearAndMonth(getYear(date), getMonth(date));
   }, [getCurrentUserChecksByYearAndMonth]);
 
-  const requestDate = `${getYear(date)}-${getMonth(date)}-${getDay(date)}`;
+  const requestDate = `${getYear(date)}-${getMonth(date)}-${getDate(date)}`;
 
   return !checkLoading && !loading && isAuthenticated ? (
     <section className="content">
@@ -20,10 +19,10 @@ const Check = ({ check: { checks, checkLoading }, auth: { user, loading, isAuthe
       <p className="lead">{getYear(date)} {getMonthName(date)} - Jelenléti ív </p>
       <div className="check-buttons">
         {checks ? checks.find(check => check.date === requestDate && !check.checkOut) ?
-          (<input type="button" value="Kicsekkolás" onClick={e => { e.preventDefault(); checkOut(getYear(date), getMonth(date), getDay(date)); }} className="btn btn-primary" />) : 
+          (<input type="button" value="Kicsekkolás" onClick={e => { e.preventDefault(); checkOut(getYear(date), getMonth(date), getDate(date)); }} className="btn btn-primary" />) : 
           checks.find(check => check.date === requestDate && check.checkOut) ?
             <div></div> : 
-            (<input type="button" value="Becsekkolás" onClick={e => { e.preventDefault(); checkIn(getYear(date), getMonth(date), getDay(date)); }} className="btn btn-primary" />)
+            (<input type="button" value="Becsekkolás" onClick={e => { e.preventDefault(); checkIn(getYear(date), getMonth(date), getDate(date)); }} className="btn btn-primary" />)
           : ''
         }
       </div>

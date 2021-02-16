@@ -29,51 +29,12 @@ router.put('/in/:year/:month/:day', auth, async (req, res) => {
     check.checks.push(checkFields);
     await check.save();
    
-    return res.send(check.checks);
+    let checkByYearAndMonth = check.checks.filter(check => check.date.includes(`${year}-${month}`));
+    checkByYearAndMonth.sort((a, b) => (a.dateTime > b.dateTime) ? 1 : -1);
+    return res.send(checkByYearAndMonth);
   } catch (error) {
     console.error(error.message);
     return res.status(500).send('Server error');
-  }
-});
-
-// @route   POST api/check/in/:year/:month/:day
-// @desc    Check In
-// @access  Public
-router.delete('/delete/:user_id/:check_id', auth, async (req, res) => {
-  const { check_id, user_id } = req.params;
-  const profile = await Profile.findOne({ user: req.user.id });
-  const title = await Title.findById(profile.title);
-  if (title.rank.permissionNumber > 1) {
-    try {
-      let userChecks = await Check.findOne({ user: user_id });
-      if (!userChecks) {
-        return res.status(400).json({ msg: 'Felhasználónak még nincsenk csekkolásai' });
-      }
-      const profileToEdit = await Profile.findOne({ user: userChecks.user });
-      const titleToEdit = await Title.findById(profileToEdit.title);
-
-      // Csak a tesztek miatt törölhető az ugyanolyan jogosultsággal rendelkezők csekkolásai
-      // A későbbiekben le kell cserélni csak kisebbre 
-      // titleToEdit.rank.permissionNumber < title.rank.permissionNumber
-      if (titleToEdit.rank.permissionNumber <= title.rank.permissionNumber) {
-
-        let checks = userChecks.checks.find(check => check.id === check_id);
-        if (!checks) {
-          return res.status(400).json({ msg: 'Csekkolás nem található' });
-        }
-
-        userChecks.checks = userChecks.checks.filter(({ id }) => id !== req.params.check_id);
-
-        await userChecks.save();
-        return res.json(userChecks.checks);
-      }
-      res.status(401).json({ msg: 'Nincs jogosultságod ehhez a művelethez'});
-    } catch (error) {
-      console.error(error.message);
-      res.status(500).send('Server Error');
-    }
-  } else {
-    res.status(401).json({ msg: 'Nincs jogosultságod ehhez a művelethez' });
   }
 });
 
@@ -96,7 +57,9 @@ router.put('/out/:year/:month/:day', auth, async (req, res) => {
         }
       }, { new: true });
       
-      return res.send(check.checks.filter(check => check.date.includes(`${year}-${month}`)));
+      let checkByYearAndMonth = check.checks.filter(check => check.date.includes(`${year}-${month}`));
+      checkByYearAndMonth.sort((a, b) => (a.dateTime > b.dateTime) ? 1 : -1);
+      return res.send(checkByYearAndMonth);
     } else if(existCheck && existCheck.checkOut !== undefined) {
       return res.status(400).send('Hiba a kicsekkolás már megtörtént');
     } else if(!existCheck) {
@@ -117,7 +80,6 @@ router.get('/me/:year/:month', auth, async (req, res) => {
       let checks = await Check.findOne({ user: req.user.id }).populate('user', ['name']);
       let checkByYearAndMonth = checks.checks.filter(check => check.date.includes(`${year}-${month}`));
       checkByYearAndMonth.sort((a, b) => (a.dateTime > b.dateTime) ? 1 : -1);
-      console.log(checkByYearAndMonth);
       res.send(checkByYearAndMonth);
     } catch (error) {
       console.error(error.message);
@@ -205,26 +167,76 @@ router.get('/:user_id/:year/:month/:day', auth, async (req, res) => {
     }
 });
 
-router.put('/:user_id/:check_id/:year/:month/:day/:direction/:time', auth, async (req, res) => {
-  const { user_id, check_id, year, month, day, direction, time } = req.params;
+router.put('/modify/:user_id/:check_id', auth, async (req, res) => {
+  const { user_id, check_id } = req.params;
+  const { year, month, day, timeIn, timeOut } = req.body;
   try {
-    let checks = await Check.findOne({ user: user_id });
-    if (direction === 'in') {
-      checks = await Check.findOneAndUpdate({ user: req.user.id, 'checks._id': check_id }, {
-        $set: {
-          "checks.$.checkIn": time
-        }
-      }, { new: true });
-    } else if (direction === 'out') {
-      checks = await Check.findOneAndUpdate({ user: req.user.id, 'checks._id': check_id }, {
-        $set: {
-          "checks.$.checkOut": time
-        }
-      }, { new: true });
-    }
+    let checks = await Check.findOneAndUpdate({ user: user_id, 'checks._id': check_id }, {
+      $set: {
+        "checks.$.checkIn": timeIn,
+        "checks.$.checkOut": timeOut
+      }
+    }, { new: true });
     let checkByYearAndMonth = checks.checks.filter(check => check.date.includes(`${year}-${month}`));
     checkByYearAndMonth.sort((a, b) => (a.dateTime > b.dateTime) ? 1 : -1);
     res.send(checkByYearAndMonth);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
+
+router.post('/create/:user_id/', auth, async (req, res) => {
+  const { user_id } = req.params;
+  const { year, month, day, checkInTime, checkOutTime } = req.body;
+
+  try {
+    const dateString = `${year}-${month}-${day}`;
+    const dateTime = new Date(dateString);
+    let checks = await Check.findOne({ user: user_id });
+    let existDate = checks.checks.filter(check => check.date.includes(`${year}-${month}-${day}`));
+    console.log(existDate);
+    if (existDate.length > 0) {
+      return res.status(408).send({ msg: 'Megadott dátumhoz már létezik csekkolás' });
+    }
+    const checkFields = {};
+    checkFields.date = dateString;
+    checkFields.dateTime = dateTime;
+    checkFields.checkIn = checkInTime;
+    checkFields.checkOut = checkOutTime;
+    checks.checks.push(checkFields);
+    await checks.save();
+    let checkByYearAndMonth = checks.checks.filter(check => check.date.includes(`${year}-${month}`));
+    checkByYearAndMonth.sort((a, b) => (a.dateTime > b.dateTime) ? 1 : -1);
+    return res.send(checkByYearAndMonth);
+   
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
+
+router.delete('/delete/:user_id/:check_id/:year/:month', auth, async (req, res) => {
+  const { user_id, check_id, year, month } = req.params;
+  try {
+    let checks = await Check.findOne({ user: user_id });
+    let profile = await Profile.findOne({ user: req.user.id }).populate('title', ['rank.permissionNumber']);
+    console.log(checks);
+    let check = checks.checks.filter(check => check._id === check_id);
+    if (!check) {
+      return res.status(404).json({ msg: 'Csekkolás nem található' });
+    }
+    // TODO ÁTIRANDÓ
+    if (profile.title.rank.permissionNumber < 2) {
+      return res.status(401).json({ msg: 'Authentikációs probléma' });
+    }
+
+    checks.checks = checks.checks.filter(({ id }) => id !== check_id);
+    await checks.save();
+
+    let checkByYearAndMonth = checks.checks.filter(check => check.date.includes(`${year}-${month}`));
+    checkByYearAndMonth.sort((a, b) => (a.dateTime > b.dateTime) ? 1 : -1);
+    return res.send(checkByYearAndMonth);
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');

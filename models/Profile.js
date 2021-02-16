@@ -37,27 +37,40 @@ const ProfileSchema = mongoose.Schema({
   taxNumber: {
     type: String
   },
-  holiday: {
-    free: {
-      type: Number
-    },
-    holidays: [
-      {
-        date: {
-          from: {
-            type: Number
+  holidays: [
+    {
+      year: {
+        type: Number
+      },
+      freeDays: {
+        type: Number
+      },
+      frees: [
+        {
+          date: {
+            from: {
+              type: Number
+            },
+            to: {
+              type: Number
+            }
           },
-          to: {
-            type: Number
+          type: {
+            type: String,
+            default: 'Fizetett'
+          },
+          accepted: {
+            type: Boolean,
+            default: false
+          },
+          decision: {
+            type: Boolean,
+            default: false
           }
-        },
-        accepted: {
-          type: Boolean,
-          default: false
         }
-      }
-    ]
-  },
+      ]
+    }
+  ],
   date: {
     type: Date,
     default: Date.now

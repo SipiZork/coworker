@@ -263,6 +263,10 @@ a {
   color: rgb(190, 1, 1);
 }
 
+.checks-table tbody tr td i.fa-plus-circle {
+  color: rgb(33, 175, 52);
+}
+
 .checks-table th {
   background-color: #9e9d9d;
   color: white;
@@ -308,7 +312,80 @@ a {
   margin: 1rem 0;
 }
 
-.profiles .profile{
+.profiles .add-user {
+  margin: 1rem 0;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--dark-color);
+}
+
+.profiles .add-user-container {
+  height: -1rem;
+  overflow: hidden;
+  animation: open-hidden-container .50s forwards;
+}
+
+.profiles .add-user-container.closing {
+  animation: hide-hidden-container .50s forwards;
+}
+
+.profiles .add-user-container .add-user-form{
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+.profiles .add-user-container .add-user-form .data {
+  position: relative;
+  height: 1.5rem;
+  width: 20rem;
+  height: 2rem;
+}
+
+.profiles .add-user-container .add-user-form .data .btn {
+  width: 100%;
+}
+
+.profiles .add-user-container .add-user-form input {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  border: none;
+  border-bottom:1px solid var(--dark-color);
+  outline: none;
+  font-size: 1.2rem;
+  padding-left: .4rem;
+}
+
+.profiles .add-user-container .add-user-form input:focus {
+  border: none;
+  outline: none;
+  border-bottom:1px solid var(--primary-color-faded);
+}
+
+.profiles .add-user-container .add-user-form input:focus ~ label,
+.profiles .add-user-container .add-user-form input:valid ~ label {
+  left: 0;
+  top: -1.2rem;
+  font-size: .9rem;
+}
+
+.profiles .add-user-container .add-user-form label {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 1.2rem;
+  color: var(--primary-color);
+  left: 0;
+  top: 0;
+  left: .25rem;
+  pointer-events: none;
+  transition: all .25s;
+}
+
+.profiles .profile {
   border-radius: .8rem;
   margin: 1.5rem 0;
 }
@@ -379,4 +456,22 @@ a {
   justify-content: center;
   align-items: center;
   gap: .5rem;
+}
+
+
+
+@keyframes open-hidden-container {
+  from {
+    height: 0;
+  } to {
+    height: 16.5rem;
+  }
+}
+
+@keyframes hide-hidden-container {
+  from {
+    height: 16.5rem;
+  } to {
+    height: 0;
+  }
 }

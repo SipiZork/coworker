@@ -1,14 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { getProfiles, getCurrentProfile } from '../../actions/profile';
+import { getProfiles, toggleAddProfileClosing } from '../../actions/profile';
 import ProfileItem from './ProfileItem';
+import AddProfile from './AddProfile';
 
-const Profiles = ({ profile: { profile, profiles }, getProfiles }) => {
+const Profiles = ({ profile: { profile, profiles }, getProfiles, toggleAddProfileClosing }) => {
   useEffect(() => {
     getProfiles();
-  }, [getProfiles, getCurrentProfile]);
+  }, [getProfiles]);
 
   const [searchField, setsearchField] = useState({
     search: ''
@@ -16,7 +16,30 @@ const Profiles = ({ profile: { profile, profiles }, getProfiles }) => {
 
   const { search } = searchField;
 
-  const onChange = e => setsearchField({
+  const [hidden, setHidden] = useState(true);
+  const [clickable, setClickable] = useState(true);
+
+  const toggleHidden = () => {
+    if (clickable) {
+      if (!hidden) {
+        setClickable(current => !current);
+        toggleAddProfileClosing();
+        setTimeout(() => {
+          toggleAddProfileClosing();
+          setClickable(current => !current);
+          setHidden(current => !current);
+        }, 500);
+      } else {
+        setHidden(current => !current);
+        setClickable(current => !current);
+        setTimeout(() => {
+          setClickable(current => !current);
+        }, 500);
+      }
+    }
+  }
+
+  const onChangeSearchField = e => setsearchField({
     ...searchField, [e.target.name]: e.target.value
   })
 
@@ -25,20 +48,28 @@ const Profiles = ({ profile: { profile, profiles }, getProfiles }) => {
       <div className="page-name-container">
         <h1 className="page-name text-primary text-weighter">Dolgozók</h1>
         <div className="search-field-container">
-          <i className="fas fa-search"></i>{' '}<input type="search" name="search" className='search-field' placeholder='Keresés név alapján' value={search} onChange={e => onChange(e)} autoComplete='off' />
+          <i className="fas fa-search"></i>{' '}<input type="search" name="search" className='search-field' placeholder='Keresés név alapján' value={search} onChange={e => onChangeSearchField(e)} autoComplete='off' />
         </div>
       </div>
       <div className="profiles">
+        <div className="add-user" onClick={toggleHidden}>
+          <i className="fas fa-plus"></i>{' '} Dolgozó hozzáadása
+        </div>
+        {!hidden && <AddProfile classes={hidden && 'closing'} />}
         {search ? profiles.filter(profile => profile.user.name.toUpperCase().includes(search.toUpperCase())).map(filteredProfile => {
-          console.log(filteredProfile);
+          
+          // let requestHolidays = 
+          console.log()
           return (
             <ProfileItem key={filteredProfile._id} profile={filteredProfile} />
           );
         }) : 
-        profiles.map(profile => (
-          <ProfileItem key={profile._id} profile={profile} />
-        ))
-      }
+          profiles.map(profile => {
+            return (
+              <ProfileItem key={profile._id} profile={profile} />
+            );
+          })
+        }
       </div>
     </section>
   )
@@ -53,4 +84,4 @@ const mapStateToProps = state => ({
   profile: state.profile
 })
 
-export default connect(mapStateToProps, { getProfiles })(Profiles);
+export default connect(mapStateToProps, { getProfiles, toggleAddProfileClosing })(Profiles);

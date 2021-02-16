@@ -6,7 +6,9 @@ const ChecksYearPicker = ({ years, activeYear, setActiveYear, setActiveMonth }) 
   const handleClick = (e, year) => {
     e.preventDefault();
     setActiveYear(year);
-    setActiveMonth(false);
+    if (setActiveMonth) {
+      setActiveMonth(false);
+    }
   }
   return (
     <Fragment>

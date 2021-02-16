@@ -18,6 +18,22 @@ const convertToQuarters = min => {
   }
 }
 
+export const countDays = (dateIn, dateOut) => {
+  const dateInTime = new Date(dateIn);
+  const dateOutTime = new Date(dateOut);
+  const msPerDay = 60 * 60 * 1000 * 24;
+  let days = Math.floor((dateOutTime - dateInTime) / msPerDay); 
+  return days + 1;
+}
+
+export const getDateString = (dateTime) => {
+  const d = new Date(dateTime);
+  const year = d.getFullYear();
+  const month = d.getMonth()+1;
+  const day = d.getDate();
+  return `${year}-${month}-${day}`;
+}
+
 export const getWorkTime = (checkInTime, checkOutTime) => {
   checkInTime = new Date(checkInTime).getTime();
   checkOutTime = new Date(checkOutTime).getTime();

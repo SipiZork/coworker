@@ -5,13 +5,14 @@ import { getChecksById } from '../../actions/check';
 import { getProfileByID } from '../../actions/profile';
 import ProfileButtons from './PropfileButtons';
 import ProfileChecks from './ProfileChecks';
+import ProfileHolidays from './ProfileHolidays';
 
 
 const Profile = ({ check: { checksById }, profileById, getChecksById, getProfileByID, match }) => {
   useEffect(() => {
     getChecksById(match.params.id);
     getProfileByID(match.params.id);
-  }, [getChecksById, match.params.id])
+  }, [getChecksById, getProfileByID, match.params.id])
   const [activeButton, setActiveButton] = useState('checks');
   return profileById === null ? <Fragment>loading...</Fragment> : (
     <section className="content">
@@ -21,8 +22,7 @@ const Profile = ({ check: { checksById }, profileById, getChecksById, getProfile
       </div>
       <div className="profile-content">
         {activeButton === 'checks' && <ProfileChecks checks={checksById} userId={match.params.id} />}
-        {activeButton === 'holidays' && <ProfileChecks />}
-        {activeButton === 'holiday-requests' && <ProfileChecks />}
+        {activeButton === 'holidays' && <ProfileHolidays holidays={profileById.holidays} userId={match.params.id} />}
       </div>
     </section>
   )

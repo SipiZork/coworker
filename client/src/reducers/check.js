@@ -1,7 +1,7 @@
 import {
   GET_CURRENT_USER_CHECKS, GET_CHECK_ERROR,
   CHECK_IN, CHECK_OUT, CHECK_LOADING_FALSE, GET_CHECKS_BY_ID, GET_CHECKS_BY_ID_YEAR_MONTH,
-  UPDATE_CHECK
+  UPDATE_CHECK, CREATE_CHECK_FROM_ADMIN, DELETE_CHECK_FROM_ADMIN
 } from '../actions/types';
 
 
@@ -34,6 +34,8 @@ export default function (state = initialState, action) {
       }
     case GET_CHECKS_BY_ID_YEAR_MONTH:
     case UPDATE_CHECK:
+    case CREATE_CHECK_FROM_ADMIN:
+    case DELETE_CHECK_FROM_ADMIN:
       return {
         ...state,
         checksByIdYearMonth: payload,

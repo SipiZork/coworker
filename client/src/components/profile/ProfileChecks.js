@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from 'react';
 import PropTypes from 'prop-types';
-import { getYear, getNumberFromMonthName } from '../../utils/date';
-import { getChecksByIdYearAndMonth, getCurrentUserChecksByYearAndMonth } from '../../actions/check';
+import { getYear } from '../../utils/date';
+import { getChecksByIdYearAndMonth } from '../../actions/check';
 import ChecksYearPicker from './ChecksYearPicker';
 import ChecksMonthPicker from './ChecksMonthPicker';
 import CheckTable from '../check/CheckTable';
@@ -33,11 +33,11 @@ const ProfileChecks = ({ checks, userId, checksByIdYearMonth, getChecksByIdYearA
       <div className="month-picker">
         <ChecksMonthPicker checks={checks.filter(check => getYear(check.dateTime) === activeYear)} activeYear={activeYear} setActiveMonth={(e) => setActiveMonth(e)} activeMonth={activeMonth} getDatas={getDatas}/>
       </div>
-      {activeYear && activeMonth && (
-        <div className="cehcks">
+      <div className="cehcks">
+        {activeYear && activeMonth && (
           <CheckTable checks={checksByIdYearMonth} adminBtns={true} userId={userId} />
-        </div>
-      )}
+        )}
+      </div>
     </Fragment>
   )
 }
